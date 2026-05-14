@@ -1,3 +1,5 @@
+[![Maintainability](https://qlty.sh/gh/1ce1ceice/projects/RussianHistoryTrainer/maintainability.svg)](https://qlty.sh/gh/1ce1ceice/projects/RussianHistoryTrainer)
+
 # Онлайн-тренажер по истории России
 
 Приложение для подготовки и самопроверки по истории России.
