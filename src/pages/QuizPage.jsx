@@ -1,0 +1,105 @@
+import { useMemo, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { questions, topics } from '../data/questions.js';
+import { saveResult } from '../utils/storage.js';
+
+export default function QuizPage() {
+  const { topicId } = useParams();
+  const topic = topics.find((item) => item.id === topicId);
+  const quizQuestions = useMemo(() => questions.filter((question) => question.topicId === topicId), [topicId]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedAnswers, setSelectedAnswers] = useState({});
+  const [isFinished, setIsFinished] = useState(false);
+
+  if (!topic) {
+    return <section className="empty"><h1>Тема не найдена</h1><Link to="/topics">Вернуться к темам</Link></section>;
+  }
+
+  const currentQuestion = quizQuestions[currentIndex];
+  const correctCount = quizQuestions.filter((question) => selectedAnswers[question.id] === question.correctAnswer).length;
+  const percent = Math.round((correctCount / quizQuestions.length) * 100);
+
+  function handleAnswer(answer) {
+    setSelectedAnswers({ ...selectedAnswers, [currentQuestion.id]: answer });
+  }
+
+  function handleNext() {
+    if (currentIndex < quizQuestions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      return;
+    }
+
+    const result = {
+      id: crypto.randomUUID(),
+      topicTitle: topic.title,
+      correctCount,
+      totalCount: quizQuestions.length,
+      percent,
+      date: new Date().toLocaleString('ru-RU'),
+    };
+
+    saveResult(result);
+    setIsFinished(true);
+  }
+
+  if (isFinished) {
+    return (
+      <section className="result-box">
+        <p className="eyebrow">Результат</p>
+        <h1>{topic.title}</h1>
+        <div className="score">{percent}%</div>
+        <p>Правильных ответов: {correctCount} из {quizQuestions.length}</p>
+        <div className="review-list">
+          {quizQuestions.map((question) => (
+            <article className="review-card" key={question.id}>
+              <h3>{question.text}</h3>
+              <p>Ваш ответ: <b>{selectedAnswers[question.id]}</b></p>
+              <p>Правильный ответ: <b>{question.correctAnswer}</b></p>
+              <small>{question.explanation}</small>
+            </article>
+          ))}
+        </div>
+        <div className="actions center">
+          <Link className="button primary" to="/topics">Выбрать другую тему</Link>
+          <Link className="button secondary" to="/results">История результатов</Link>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="quiz">
+      <div className="quiz-header">
+        <div>
+          <p className="eyebrow">Тест</p>
+          <h1>{topic.title}</h1>
+        </div>
+        <span className="badge">{currentIndex + 1} / {quizQuestions.length}</span>
+      </div>
+
+      <article className="question-card">
+        <h2>{currentQuestion.text}</h2>
+        <div className="answers">
+          {currentQuestion.answers.map((answer) => (
+            <button
+              className={selectedAnswers[currentQuestion.id] === answer ? 'answer selected' : 'answer'}
+              key={answer}
+              onClick={() => handleAnswer(answer)}
+              type="button"
+            >
+              {answer}
+            </button>
+          ))}
+        </div>
+        <button
+          className="button primary next"
+          disabled={!selectedAnswers[currentQuestion.id]}
+          onClick={handleNext}
+          type="button"
+        >
+          {currentIndex === quizQuestions.length - 1 ? 'Завершить тест' : 'Следующий вопрос'}
+        </button>
+      </article>
+    </section>
+  );
+}
