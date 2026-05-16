@@ -54,7 +54,7 @@ http://localhost:5173
 
 ## Деплой
 
-https://lighthearted-moxie-ffa41c.netlify.app/
+https://russianhistorytrainer.netlify.app
 
 ## Demo
 
