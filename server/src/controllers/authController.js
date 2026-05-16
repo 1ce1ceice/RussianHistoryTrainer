@@ -57,8 +57,12 @@ const login = async (req, res) => {
         role: user.role,
       },
     });
-  } catch (error) {
-    res.status(500).json({ message: 'Ошибка входа' });
+    } catch (error) {
+    console.error('LOGIN ERROR:', error);
+
+    res.status(500).json({
+      message: 'Ошибка входа',
+    });
   }
 };
 
