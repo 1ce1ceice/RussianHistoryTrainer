@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { questions, topics } from '../data/questions.js';
-import { saveResult } from '../utils/storage.js';
+import { saveResult } from '../api/resultApi.js';
+import { useAuth } from '../context/AuthContext.jsx';
 
 export default function QuizPage() {
   const { topicId } = useParams();
+  const { token } = useAuth();
   const topic = topics.find((item) => item.id === topicId);
   const quizQuestions = useMemo(() => questions.filter((question) => question.topicId === topicId), [topicId]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -23,22 +25,21 @@ export default function QuizPage() {
     setSelectedAnswers({ ...selectedAnswers, [currentQuestion.id]: answer });
   }
 
-  function handleNext() {
+  async function handleNext() {
     if (currentIndex < quizQuestions.length - 1) {
       setCurrentIndex(currentIndex + 1);
       return;
     }
 
-    const result = {
-      id: crypto.randomUUID(),
-      topicTitle: topic.title,
-      correctCount,
-      totalCount: quizQuestions.length,
-      percent,
-      date: new Date().toLocaleString('ru-RU'),
-    };
+    if (token) {
+      await saveResult(token, {
+        topicId: topic.dbId,
+        score: correctCount,
+        total: quizQuestions.length,
+        percent,
+      });
+    }
 
-    saveResult(result);
     setIsFinished(true);
   }
 
