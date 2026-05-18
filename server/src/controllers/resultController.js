@@ -48,7 +48,33 @@ const getMyResults = async (req, res) => {
   }
 };
 
+const getStats = async (req, res) => {
+  try {
+    const stats = await pool.query(
+      `
+      SELECT
+        COUNT(*)::int AS total_tests,
+        ROUND(AVG(percent))::int AS average_percent,
+        MAX(percent)::int AS best_percent,
+        COUNT(DISTINCT topic_id)::int AS completed_topics
+      FROM test_results
+      WHERE user_id = $1
+      `,
+      [req.user.id]
+    );
+
+    res.json(stats.rows[0]);
+  } catch (error) {
+    console.error('GET STATS ERROR:', error);
+
+    res.status(500).json({
+      message: 'Ошибка получения статистики',
+    });
+  }
+};
+
 module.exports = {
   createResult,
   getMyResults,
+  getStats,
 };
