@@ -1,28 +1,76 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { questions, topics } from '../data/questions.js';
+import { topics } from '../data/questions.js';
 import { saveResult } from '../api/resultApi.js';
 import { useAuth } from '../context/AuthContext.jsx';
+
+const API_URL = 'http://localhost:5001/api';
 
 export default function QuizPage() {
   const { topicId } = useParams();
   const { token } = useAuth();
   const topic = topics.find((item) => item.id === topicId);
-  const quizQuestions = useMemo(() => questions.filter((question) => question.topicId === topicId), [topicId]);
+
+  const [quizQuestions, setQuizQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
   const [isFinished, setIsFinished] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      if (!topic) {
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/questions/topic/${topic.dbId}`);
+      const data = await response.json();
+
+      setQuizQuestions(Array.isArray(data) ? data : []);
+      setIsLoading(false);
+    };
+
+    loadQuestions();
+  }, [topic]);
 
   if (!topic) {
-    return <section className="empty"><h1>Тема не найдена</h1><Link to="/topics">Вернуться к темам</Link></section>;
+    return (
+      <section className="empty">
+        <h1>Тема не найдена</h1>
+        <Link to="/topics">Вернуться к темам</Link>
+      </section>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <section className="empty">
+        <h1>Загрузка вопросов...</h1>
+      </section>
+    );
+  }
+
+  if (quizQuestions.length === 0) {
+    return (
+      <section className="empty">
+        <h1>Вопросы не найдены</h1>
+        <Link to="/topics">Вернуться к темам</Link>
+      </section>
+    );
   }
 
   const currentQuestion = quizQuestions[currentIndex];
-  const correctCount = quizQuestions.filter((question) => selectedAnswers[question.id] === question.correctAnswer).length;
+  const correctCount = quizQuestions.filter(
+    (question) => selectedAnswers[question.id] === question.correctAnswer,
+  ).length;
   const percent = Math.round((correctCount / quizQuestions.length) * 100);
 
   function handleAnswer(answer) {
-    setSelectedAnswers({ ...selectedAnswers, [currentQuestion.id]: answer });
+    setSelectedAnswers({
+      ...selectedAnswers,
+      [currentQuestion.id]: answer,
+    });
   }
 
   async function handleNext() {
@@ -50,6 +98,7 @@ export default function QuizPage() {
         <h1>{topic.title}</h1>
         <div className="score">{percent}%</div>
         <p>Правильных ответов: {correctCount} из {quizQuestions.length}</p>
+
         <div className="review-list">
           {quizQuestions.map((question) => (
             <article className="review-card" key={question.id}>
@@ -60,6 +109,7 @@ export default function QuizPage() {
             </article>
           ))}
         </div>
+
         <div className="actions center">
           <Link className="button primary" to="/topics">Выбрать другую тему</Link>
           <Link className="button secondary" to="/results">История результатов</Link>
@@ -80,6 +130,7 @@ export default function QuizPage() {
 
       <article className="question-card">
         <h2>{currentQuestion.text}</h2>
+
         <div className="answers">
           {currentQuestion.answers.map((answer) => (
             <button
@@ -92,6 +143,7 @@ export default function QuizPage() {
             </button>
           ))}
         </div>
+
         <button
           className="button primary next"
           disabled={!selectedAnswers[currentQuestion.id]}

@@ -3,6 +3,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const resultRoutes = require('./routes/resultRoutes');
+const questionRoutes = require('./routes/questionRoutes');
 require('dotenv').config();
 
 const topicRoutes = require('./routes/topicRoutes');
@@ -23,6 +24,7 @@ app.get('/api/health', (req, res) => {
 });
 
 app.use('/api/topics', topicRoutes);
+app.use('/api/questions', questionRoutes);
 
 const PORT = process.env.PORT || 5001;
 
