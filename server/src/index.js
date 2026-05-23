@@ -4,6 +4,7 @@ const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const resultRoutes = require('./routes/resultRoutes');
 const questionRoutes = require('./routes/questionRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 require('dotenv').config();
 
 const topicRoutes = require('./routes/topicRoutes');
@@ -12,6 +13,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/results', resultRoutes);
