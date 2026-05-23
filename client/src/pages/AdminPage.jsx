@@ -23,6 +23,8 @@ export default function AdminPage() {
 
   const [topics, setTopics] = useState([]);
 
+  const [questions, setQuestions] = useState([]);
+
   useEffect(() => {
     const loadTopics = async () => {
       const response = await fetch(`${API_URL}/topics`);
@@ -33,6 +35,26 @@ export default function AdminPage() {
 
     loadTopics();
   }, []);
+
+  useEffect(() => {
+    const loadQuestions = async () => {
+      if (!token || user?.role !== 'admin') {
+        return;
+      }
+
+      const response = await fetch(`${API_URL}/admin/questions`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+
+      setQuestions(Array.isArray(data) ? data : []);
+    };
+
+    loadQuestions();
+  }, [token, user]);
 
   if (!user || user.role !== 'admin') {
     return (
@@ -116,6 +138,16 @@ export default function AdminPage() {
 
     if (data.id) {
       setMessage('Вопрос успешно создан');
+      const selectedTopic = topics.find((topic) => topic.id === Number(questionForm.topicId));
+
+      setQuestions((prevQuestions) => [
+        ...prevQuestions,
+        {
+          id: data.id,
+          text: data.text,
+          topic: selectedTopic?.title || 'Без темы',
+        },
+      ]);
       setQuestionForm({
         topicId: '',
         text: '',
@@ -127,6 +159,31 @@ export default function AdminPage() {
     }
 
     setMessage(data.message || 'Ошибка создания вопроса');
+  };
+
+  const deleteTopic = async (topicId) => {
+    const isConfirmed = window.confirm('Удалить эту тему?');
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/admin/topics/${topicId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setTopics((prevTopics) => prevTopics.filter((topic) => topic.id !== topicId));
+      setMessage(data.message || 'Тема удалена');
+      return;
+    }
+
+    setMessage(data.message || 'Ошибка удаления темы');
   };
 
   return (
@@ -248,6 +305,7 @@ export default function AdminPage() {
                   <th>ID</th>
                   <th>Название</th>
                   <th>Описание</th>
+                  <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -256,6 +314,43 @@ export default function AdminPage() {
                     <td>{topic.id}</td>
                     <td>{topic.title}</td>
                     <td>{topic.description}</td>
+                    <td>
+                      <button
+                        className="button secondary"
+                        type="button"
+                        onClick={() => deleteTopic(topic.id)}
+                      >
+                        Удалить
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+      <div className="admin-table auth-card">
+        <h2>Список вопросов</h2>
+
+        {questions.length === 0 ? (
+          <p>Вопросы пока не добавлены.</p>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Вопрос</th>
+                  <th>Тема</th>
+                </tr>
+              </thead>
+              <tbody>
+                {questions.map((question) => (
+                  <tr key={question.id}>
+                    <td>{question.id}</td>
+                    <td>{question.text}</td>
+                    <td>{question.topic}</td>
                   </tr>
                 ))}
               </tbody>

@@ -178,14 +178,22 @@ h3 {
 
 .cards {
   align-items: stretch;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .card {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  min-height: 360px;
+  gap: 18px;
+  min-height: 0;
+}
+
+.card p {
+  margin: 0;
+}
+
+.card .button {
+  margin-top: 8px;
 }
 
 .badge {
@@ -466,4 +474,8 @@ th {
 
 .admin-page > p {
   font-size: 23px;
+}
+
+.admin-table {
+  margin-top: 50px;
 }

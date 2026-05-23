@@ -88,8 +88,85 @@ const getTopics = async (req, res) => {
   }
 };
 
+const deleteTopic = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      `
+      DELETE FROM topics
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    res.json({
+      message: 'Тема удалена',
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Ошибка удаления темы',
+    });
+  }
+};
+
+const getQuestions = async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT
+        questions.id,
+        questions.text,
+        topics.title AS topic
+      FROM questions
+      JOIN topics
+      ON topics.id = questions.topic_id
+      ORDER BY questions.id
+    `);
+
+    res.json(result.rows);
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Ошибка получения вопросов',
+    });
+  }
+};
+
+const deleteQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    await pool.query(
+      `
+      DELETE FROM questions
+      WHERE id = $1
+      `,
+      [id]
+    );
+
+    res.json({
+      message: 'Вопрос удален',
+    });
+
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Ошибка удаления вопроса',
+    });
+  }
+};
+
 module.exports = {
   createTopic,
   createQuestion,
   getTopics,
+  deleteTopic,
+  getQuestions,
+  deleteQuestion,
 };

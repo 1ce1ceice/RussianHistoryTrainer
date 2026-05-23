@@ -7,10 +7,16 @@ const {
   createTopic,
   createQuestion,
   getTopics,
+  deleteTopic,
+  getQuestions,
+    deleteQuestion,
 } = require('../controllers/adminController');
 
 router.post('/topics', authMiddleware, adminMiddleware, createTopic);
 router.post('/questions', authMiddleware, adminMiddleware, createQuestion);
 router.get('/topics', authMiddleware, adminMiddleware, getTopics);
+router.delete('/topics/:id', authMiddleware, adminMiddleware, deleteTopic);
+router.get('/questions', authMiddleware, adminMiddleware, getQuestions);
+router.delete('/questions/:id', authMiddleware, adminMiddleware, deleteQuestion);
 
 module.exports = router;
