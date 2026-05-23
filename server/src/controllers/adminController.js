@@ -117,20 +117,22 @@ const getQuestions = async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT
-        questions.id,
-        questions.text,
-        topics.title AS topic
-      FROM questions
-      JOIN topics
-      ON topics.id = questions.topic_id
-      ORDER BY questions.id
+        q.id,
+        q.topic_id,
+        q.text,
+        q.explanation,
+        t.title AS topic,
+        ARRAY_AGG(a.text ORDER BY a.id) AS answers,
+        MAX(CASE WHEN a.is_correct = true THEN a.text END) AS correct_answer
+      FROM questions q
+      JOIN topics t ON t.id = q.topic_id
+      LEFT JOIN answers a ON a.question_id = q.id
+      GROUP BY q.id, q.topic_id, q.text, q.explanation, t.title
+      ORDER BY q.id
     `);
-
     res.json(result.rows);
-
   } catch (error) {
     console.error(error);
-
     res.status(500).json({
       message: 'Ошибка получения вопросов',
     });
