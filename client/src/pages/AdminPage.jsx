@@ -235,6 +235,34 @@ export default function AdminPage() {
           </button>
         </form>
       </div>
+      <div className="admin-table auth-card">
+        <h2>Список тем</h2>
+
+        {topics.length === 0 ? (
+          <p>Темы пока не добавлены.</p>
+        ) : (
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Название</th>
+                  <th>Описание</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topics.map((topic) => (
+                  <tr key={topic.id}>
+                    <td>{topic.id}</td>
+                    <td>{topic.title}</td>
+                    <td>{topic.description}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
     </section>
   );
 }
