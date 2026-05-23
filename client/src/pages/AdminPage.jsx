@@ -184,12 +184,12 @@ export default function AdminPage() {
   const startEditQuestion = (question) => {
     setEditingQuestion(question);
     setEditQuestionForm({
-      topicId: String(question.topic_id || ''),
-      text: question.text,
-      explanation: question.explanation || '',
-      answers: question.answers || ['', '', '', ''],
-      correctAnswer: question.correctAnswer || '',
-    });
+  topicId: String(question.topic_id || ''),
+  text: question.text,
+  explanation: question.explanation || '',
+  answers: question.answers || ['', '', '', ''],
+  correctAnswer: question.correct_answer || '',
+});
     setMessage('');
   };
 

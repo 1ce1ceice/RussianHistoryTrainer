@@ -584,35 +584,37 @@ th {
 }
 
 .readonly-topic {
-
   display: flex;
-
   flex-direction: column;
-
   gap: 10px;
-
 }
 
 .readonly-topic span {
-
   font-size: 18px;
-
   font-weight: 700;
-
 }
 
 .readonly-topic-value {
-
   padding: 18px 22px;
-
   border: 1px solid #d7deee;
-
   border-radius: 18px;
-
   background: #f7f9fc;
-
   font-size: 20px;
-
   font-weight: 600;
+}
 
+.modal-overlay {
+  align-items: flex-start;
+  overflow-y: auto;
+  padding: 40px 24px;
+}
+
+.modal {
+  max-height: 85vh;
+  overflow-y: auto;
+  max-width: 720px;
+}
+
+.modal textarea {
+  min-height: 110px;
 }
