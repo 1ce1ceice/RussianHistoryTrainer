@@ -25,6 +25,13 @@ export default function AdminPage() {
 
   const [questions, setQuestions] = useState([]);
 
+  const [editingQuestion, setEditingQuestion] = useState(null);
+  const [editQuestionForm, setEditQuestionForm] = useState({
+    topicId: '',
+    text: '',
+    explanation: '',
+  });
+
   useEffect(() => {
     const loadTopics = async () => {
       const response = await fetch(`${API_URL}/topics`);
@@ -118,7 +125,7 @@ export default function AdminPage() {
     setMessage(data.message || 'Ошибка создания темы');
   };
 
-  const createQuestion = async (event) => {
+  const handleQuestionSubmit = async (event) => {
     event.preventDefault();
     setMessage('');
 
@@ -137,17 +144,20 @@ export default function AdminPage() {
     const data = await response.json();
 
     if (data.id) {
-      setMessage('Вопрос успешно создан');
       const selectedTopic = topics.find((topic) => topic.id === Number(questionForm.topicId));
 
       setQuestions((prevQuestions) => [
         ...prevQuestions,
         {
           id: data.id,
+          topic_id: Number(questionForm.topicId),
           text: data.text,
+          explanation: data.explanation,
           topic: selectedTopic?.title || 'Без темы',
         },
       ]);
+
+      setMessage('Вопрос успешно создан');
       setQuestionForm({
         topicId: '',
         text: '',
@@ -158,7 +168,59 @@ export default function AdminPage() {
       return;
     }
 
-    setMessage(data.message || 'Ошибка создания вопроса');
+    setMessage(data.message || 'Ошибка сохранения вопроса');
+  };
+
+  const startEditQuestion = (question) => {
+    setEditingQuestion(question);
+    setEditQuestionForm({
+      topicId: String(question.topic_id || ''),
+      text: question.text,
+      explanation: question.explanation || '',
+    });
+    setMessage('');
+  };
+
+  const handleEditQuestionSubmit = async (event) => {
+    event.preventDefault();
+    setMessage('');
+
+    const response = await fetch(`${API_URL}/admin/questions/${editingQuestion.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        topicId: Number(editQuestionForm.topicId),
+        text: editQuestionForm.text,
+        explanation: editQuestionForm.explanation,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (data.id) {
+      const selectedTopic = topics.find((topic) => topic.id === Number(editQuestionForm.topicId));
+
+      setQuestions((prevQuestions) => prevQuestions.map((question) => (
+        question.id === data.id
+          ? {
+              id: data.id,
+              topic_id: Number(editQuestionForm.topicId),
+              text: data.text,
+              explanation: data.explanation,
+              topic: selectedTopic?.title || 'Без темы',
+            }
+          : question
+      )));
+
+      setEditingQuestion(null);
+      setMessage('Вопрос успешно обновлен');
+      return;
+    }
+
+    setMessage(data.message || 'Ошибка редактирования вопроса');
   };
 
   const deleteTopic = async (topicId) => {
@@ -204,6 +266,11 @@ export default function AdminPage() {
 
     if (response.ok) {
       setQuestions((prevQuestions) => prevQuestions.filter((question) => question.id !== questionId));
+
+      if (editingQuestion?.id === questionId) {
+        setEditingQuestion(null);
+      }
+
       setMessage(data.message || 'Вопрос удален');
       return;
     }
@@ -249,7 +316,7 @@ export default function AdminPage() {
           </button>
         </form>
 
-        <form className="auth-card auth-form" onSubmit={createQuestion}>
+        <form className="auth-card auth-form" onSubmit={handleQuestionSubmit}>
           <h2>Создать вопрос</h2>
 
           <label>
@@ -336,7 +403,9 @@ export default function AdminPage() {
               <tbody>
                 {topics.map((topic) => (
                   <tr key={topic.id}>
-                    <td>{topic.id}</td>
+                    <td>
+                      <span>{topic.id}</span>
+                    </td>
                     <td>{topic.title}</td>
                     <td>{topic.description}</td>
                     <td>
@@ -374,17 +443,29 @@ export default function AdminPage() {
               <tbody>
                 {questions.map((question) => (
                   <tr key={question.id}>
-                    <td>{question.id}</td>
+                    <td>
+                      <span>{question.id}</span>
+                    </td>
                     <td>{question.text}</td>
                     <td>{question.topic}</td>
                     <td>
-                      <button
-                        className="button secondary"
-                        type="button"
-                        onClick={() => deleteQuestion(question.id)}
-                      >
-                        Удалить
-                      </button>
+                      <div className="table-actions">
+                        <button
+                          className="button secondary"
+                          type="button"
+                          onClick={() => startEditQuestion(question)}
+                        >
+                          Редактировать
+                        </button>
+
+                        <button
+                          className="button secondary"
+                          type="button"
+                          onClick={() => deleteQuestion(question.id)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -393,6 +474,58 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+      {editingQuestion && (
+        <div className="modal-overlay">
+          <form className="modal auth-form" onSubmit={handleEditQuestionSubmit}>
+            <h2>Редактировать вопрос</h2>
+
+            <div className="readonly-topic">
+              <span>Тема</span>
+              <div className="readonly-topic-value">
+                {topics.find((topic) => topic.id === Number(editQuestionForm.topicId))?.title || 'Без темы'}
+              </div>
+            </div>
+
+            <label>
+              Текст вопроса
+              <textarea
+                name="text"
+                value={editQuestionForm.text}
+                onChange={(event) => setEditQuestionForm({
+                  ...editQuestionForm,
+                  text: event.target.value,
+                })}
+                required
+              />
+            </label>
+
+            <label>
+              Объяснение
+              <textarea
+                name="explanation"
+                value={editQuestionForm.explanation}
+                onChange={(event) => setEditQuestionForm({
+                  ...editQuestionForm,
+                  explanation: event.target.value,
+                })}
+                required
+              />
+            </label>
+
+            <button className="button primary full" type="submit">
+              Сохранить изменения
+            </button>
+
+            <button
+              className="button secondary full"
+              type="button"
+              onClick={() => setEditingQuestion(null)}
+            >
+              Отмена
+            </button>
+          </form>
+        </div>
+      )}
     </section>
   );
 }

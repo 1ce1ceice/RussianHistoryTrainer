@@ -162,6 +162,33 @@ const deleteQuestion = async (req, res) => {
   }
 };
 
+const updateQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { topicId, text, explanation } = req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE questions
+      SET topic_id = $1,
+          text = $2,
+          explanation = $3
+      WHERE id = $4
+      RETURNING *
+      `,
+      [topicId, text, explanation, id]
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Ошибка редактирования вопроса',
+    });
+  }
+};
+
 module.exports = {
   createTopic,
   createQuestion,
@@ -169,4 +196,5 @@ module.exports = {
   deleteTopic,
   getQuestions,
   deleteQuestion,
+    updateQuestion,
 };
