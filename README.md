@@ -102,9 +102,9 @@ http://localhost:5173
 
 ## Деплой
 
-**Frontend:** https://russianhistorytrainer.pages.dev
-**Backend API:** https://russianhistorytrainer.onrender.com
-**Database:** Neon PostgreSQL
+- **Frontend:** https://russianhistorytrainer.pages.dev
+- **Backend API:** https://russianhistorytrainer.onrender.com
+- **Database:** Neon PostgreSQL
 
 # Роли пользователей 
 
