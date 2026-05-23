@@ -12,6 +12,9 @@ const topicRoutes = require('./routes/topicRoutes');
 const app = express();
 
 app.use(cors());
+app.get('/', (req, res) => {
+  res.send('RussianHistoryTrainer API is running');
+});
 app.use(express.json());
 app.use('/api/admin', adminRoutes);
 app.use('/api/users', userRoutes);
