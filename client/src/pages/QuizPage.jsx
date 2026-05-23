@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { topics } from '../data/questions.js';
 import { saveResult } from '../api/resultApi.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -9,8 +8,8 @@ const API_URL = 'http://localhost:5001/api';
 export default function QuizPage() {
   const { topicId } = useParams();
   const { token } = useAuth();
-  const topic = topics.find((item) => item.id === topicId);
 
+  const [topic, setTopic] = useState(null);
   const [quizQuestions, setQuizQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -18,35 +17,49 @@ export default function QuizPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const loadQuestions = async () => {
-      if (!topic) {
+    const loadQuizData = async () => {
+      setIsLoading(true);
+      setTopic(null);
+      setQuizQuestions([]);
+      setCurrentIndex(0);
+      setSelectedAnswers({});
+      setIsFinished(false);
+
+      const topicsResponse = await fetch(`${API_URL}/topics`);
+      const topicsData = await topicsResponse.json();
+      const foundTopic = Array.isArray(topicsData)
+        ? topicsData.find((item) => item.id === Number(topicId))
+        : null;
+
+      if (!foundTopic) {
         setIsLoading(false);
         return;
       }
 
-      const response = await fetch(`${API_URL}/questions/topic/${topic.dbId}`);
-      const data = await response.json();
+      const questionsResponse = await fetch(`${API_URL}/questions/topic/${foundTopic.id}`);
+      const questionsData = await questionsResponse.json();
 
-      setQuizQuestions(Array.isArray(data) ? data : []);
+      setTopic(foundTopic);
+      setQuizQuestions(Array.isArray(questionsData) ? questionsData : []);
       setIsLoading(false);
     };
 
-    loadQuestions();
-  }, [topic]);
+    loadQuizData();
+  }, [topicId]);
+
+  if (isLoading) {
+    return (
+      <section className="empty">
+        <h1>Загрузка вопросов...</h1>
+      </section>
+    );
+  }
 
   if (!topic) {
     return (
       <section className="empty">
         <h1>Тема не найдена</h1>
         <Link to="/topics">Вернуться к темам</Link>
-      </section>
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <section className="empty">
-        <h1>Загрузка вопросов...</h1>
       </section>
     );
   }
@@ -81,7 +94,7 @@ export default function QuizPage() {
 
     if (token) {
       await saveResult(token, {
-        topicId: topic.dbId,
+        topicId: topic.id,
         score: correctCount,
         total: quizQuestions.length,
         percent,

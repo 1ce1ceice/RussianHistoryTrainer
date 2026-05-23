@@ -3,12 +3,6 @@ import { Link } from 'react-router-dom';
 
 const API_URL = 'http://localhost:5001/api';
 
-const topicSlugs = {
-  1: 'ancient-rus',
-  2: 'peter-i',
-  3: 'ussr',
-};
-
 export default function TopicsPage() {
   const [topics, setTopics] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,15 +37,14 @@ export default function TopicsPage() {
         </div>
       ) : (
         <div className="cards">
-          {topics.map((topic) => {
-            const slug = topicSlugs[topic.id] || `topic-${topic.id}`;
+          {topics.map((topic, index) => {
 
             return (
               <article className="card" key={topic.id}>
                 <h2>{topic.title}</h2>
                 <p>{topic.description}</p>
-                <span className="badge">Тема №{topic.id}</span>
-                <Link className="button primary full" to={`/quiz/${slug}`}>
+                <span className="badge">Тема №{index + 1}</span>
+                <Link className="button primary full" to={`/quiz/${topic.id}`}>
                   Пройти тест
                 </Link>
               </article>
