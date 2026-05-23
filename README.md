@@ -2,7 +2,7 @@
 
 # Онлайн-тренажер по истории России
 
-Приложение для подготовки и самопроверки по истории России. :exclamation:В текущей версии полная серверная часть и база данных работают только локально, так как я еще не задеплоил бэкенд:exclamation:
+Приложение для подготовки и самопроверки по истории России.
 
 ## :question:Функции
 
@@ -42,7 +42,11 @@
 
 - **UI:** CSS
 
-- **Deployment:** Netlify
+- **Frontend Deploy:** Cloudflare Pages
+
+- **Backend Deploy:** Render
+
+- **Database Hosting:** Neon PostgreSQL
 
 ## :exclamation:Установка
 
@@ -98,7 +102,25 @@ http://localhost:5173
 
 ## Деплой
 
-https://russianhistorytrainer.netlify.app
+**Frontend:** https://russianhistorytrainer.pages.dev
+**Backend API:** https://russianhistorytrainer.onrender.com
+**Database:** Neon PostgreSQL
+
+## Роли пользователей 
+
+# Пользователь
+
+- Регистрация
+- Вход в аккаунт
+- Прохождение тестов
+- Просмотр результатов
+- Просмотр статистики в профиле
+
+# Администратор
+
+- Создание тем, вопросов, ответов
+- Редактирование тем, вопросов, ответов
+- Удаление тем, вопросов, ответов
 
 ## Demo
 
