@@ -9,6 +9,7 @@ import AboutPage from './pages/AboutPage.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
 import ProfilePage from './pages/ProfilePage.jsx';
+import AdminPage from './pages/AdminPage.jsx';
 import NotFoundPage from './pages/NotFoundPage.jsx';
 
 export default function App() {
@@ -29,6 +30,14 @@ export default function App() {
             element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute>
+                <AdminPage />
               </ProtectedRoute>
             }
           />

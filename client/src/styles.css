@@ -404,3 +404,66 @@ th {
   background: #edf2ff;
   color: #2447c6;
 }
+
+.auth-form textarea,
+.auth-form select {
+  border: 1px solid #d7deee;
+  border-radius: 14px;
+  font: inherit;
+  padding: 14px 16px;
+  width: 100%;
+}
+
+.auth-form textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+.auth-form select {
+  min-height: 54px;
+}
+
+.auth-form textarea:focus,
+.auth-form select:focus {
+  border-color: #2447c6;
+  outline: none;
+}
+
+.admin-page {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.admin-page > .eyebrow,
+.admin-page > h1,
+.admin-page > p {
+  text-align: center;
+}
+
+.admin-grid {
+  margin-top: 48px;
+
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+
+  gap: 40px;
+}
+
+.admin-grid .auth-card {
+  width: 100%;
+  max-width: 900px;
+}
+
+.admin-page > h1 {
+  font-size: 39px;
+}
+
+.admin-page > .eyebrow {
+  font-size: 18px;
+}
+
+.admin-page > p {
+  font-size: 23px;
+}
