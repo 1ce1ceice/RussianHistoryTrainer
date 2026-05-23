@@ -165,9 +165,9 @@ const deleteQuestion = async (req, res) => {
 const updateQuestion = async (req, res) => {
   try {
     const { id } = req.params;
-    const { topicId, text, explanation } = req.body;
+    const { topicId, text, explanation, answers, correctAnswer } = req.body;
 
-    const result = await pool.query(
+    const questionResult = await pool.query(
       `
       UPDATE questions
       SET topic_id = $1,
@@ -179,12 +179,56 @@ const updateQuestion = async (req, res) => {
       [topicId, text, explanation, id]
     );
 
-    res.json(result.rows[0]);
+    await pool.query(
+      `
+      DELETE FROM answers
+      WHERE question_id = $1
+      `,
+      [id]
+    );
+
+    for (const answer of answers) {
+      await pool.query(
+        `
+        INSERT INTO answers (question_id, text, is_correct)
+        VALUES ($1, $2, $3)
+        `,
+        [id, answer, answer === correctAnswer]
+      );
+    }
+
+    res.json(questionResult.rows[0]);
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       message: 'Ошибка редактирования вопроса',
+    });
+  }
+};
+
+const updateTopic = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, description } = req.body;
+
+    const result = await pool.query(
+      `
+      UPDATE topics
+      SET title = $1,
+          description = $2
+      WHERE id = $3
+      RETURNING *
+      `,
+      [title, description, id]
+    );
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      message: 'Ошибка редактирования темы',
     });
   }
 };
@@ -197,4 +241,5 @@ module.exports = {
   getQuestions,
   deleteQuestion,
     updateQuestion,
+  updateTopic,
 };

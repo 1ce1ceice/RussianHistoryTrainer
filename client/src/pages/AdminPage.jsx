@@ -27,9 +27,17 @@ export default function AdminPage() {
 
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [editQuestionForm, setEditQuestionForm] = useState({
-    topicId: '',
-    text: '',
-    explanation: '',
+  topicId: '',
+  text: '',
+  explanation: '',
+  answers: ['', '', '', ''],
+  correctAnswer: '',
+});
+
+  const [editingTopic, setEditingTopic] = useState(null);
+  const [editTopicForm, setEditTopicForm] = useState({
+    title: '',
+    description: '',
   });
 
   useEffect(() => {
@@ -138,6 +146,8 @@ export default function AdminPage() {
       body: JSON.stringify({
         ...questionForm,
         topicId: Number(questionForm.topicId),
+        answers: questionForm.answers.filter((answer) => !!answer),
+        correctAnswer: questionForm.correctAnswer,  
       }),
     });
 
@@ -177,6 +187,8 @@ export default function AdminPage() {
       topicId: String(question.topic_id || ''),
       text: question.text,
       explanation: question.explanation || '',
+      answers: question.answers || ['', '', '', ''],
+      correctAnswer: question.correctAnswer || '',
     });
     setMessage('');
   };
@@ -223,6 +235,52 @@ export default function AdminPage() {
     setMessage(data.message || 'Ошибка редактирования вопроса');
   };
 
+  const startEditTopic = (topic) => {
+    setEditingTopic(topic);
+    setEditTopicForm({
+      title: topic.title,
+      description: topic.description,
+    });
+    setMessage('');
+  };
+
+  const handleEditTopicSubmit = async (event) => {
+    event.preventDefault();
+    setMessage('');
+
+    const response = await fetch(`${API_URL}/admin/topics/${editingTopic.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(editTopicForm),
+    });
+
+    const data = await response.json();
+
+    if (data.id) {
+      setTopics((prevTopics) => prevTopics.map((topic) => (
+        topic.id === data.id ? data : topic
+      )));
+
+      setQuestions((prevQuestions) => prevQuestions.map((question) => (
+        question.topic_id === data.id
+          ? {
+              ...question,
+              topic: data.title,
+            }
+          : question
+      )));
+
+      setEditingTopic(null);
+      setMessage('Тема успешно обновлена');
+      return;
+    }
+
+    setMessage(data.message || 'Ошибка редактирования темы');
+  };
+
   const deleteTopic = async (topicId) => {
     const isConfirmed = window.confirm('Удалить эту тему?');
 
@@ -241,6 +299,11 @@ export default function AdminPage() {
 
     if (response.ok) {
       setTopics((prevTopics) => prevTopics.filter((topic) => topic.id !== topicId));
+
+      if (editingTopic?.id === topicId) {
+        setEditingTopic(null);
+      }
+
       setMessage(data.message || 'Тема удалена');
       return;
     }
@@ -409,13 +472,23 @@ export default function AdminPage() {
                     <td>{topic.title}</td>
                     <td>{topic.description}</td>
                     <td>
-                      <button
-                        className="button secondary"
-                        type="button"
-                        onClick={() => deleteTopic(topic.id)}
-                      >
-                        Удалить
-                      </button>
+                      <div className="table-actions">
+                        <button
+                          className="button secondary"
+                          type="button"
+                          onClick={() => startEditTopic(topic)}
+                        >
+                          Редактировать
+                        </button>
+
+                        <button
+                          className="button secondary"
+                          type="button"
+                          onClick={() => deleteTopic(topic.id)}
+                        >
+                          Удалить
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -474,6 +547,50 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+      {editingTopic && (
+        <div className="modal-overlay">
+          <form className="modal auth-form" onSubmit={handleEditTopicSubmit}>
+            <h2>Редактировать тему</h2>
+
+            <label>
+              Название темы
+              <input
+                type="text"
+                value={editTopicForm.title}
+                onChange={(event) => setEditTopicForm({
+                  ...editTopicForm,
+                  title: event.target.value,
+                })}
+                required
+              />
+            </label>
+
+            <label>
+              Описание
+              <textarea
+                value={editTopicForm.description}
+                onChange={(event) => setEditTopicForm({
+                  ...editTopicForm,
+                  description: event.target.value,
+                })}
+                required
+              />
+            </label>
+
+            <button className="button primary full" type="submit">
+              Сохранить изменения
+            </button>
+
+            <button
+              className="button secondary full"
+              type="button"
+              onClick={() => setEditingTopic(null)}
+            >
+              Отмена
+            </button>
+          </form>
+        </div>
+      )}
       {editingQuestion && (
         <div className="modal-overlay">
           <form className="modal auth-form" onSubmit={handleEditQuestionSubmit}>
@@ -511,6 +628,40 @@ export default function AdminPage() {
                 required
               />
             </label>
+
+            {editQuestionForm.answers.map((answer, index) => (
+  <label key={index}>
+    Ответ {index + 1}
+
+    <input
+      value={answer}
+      onChange={(event) => {
+        const updated = [...editQuestionForm.answers];
+
+        updated[index] = event.target.value;
+
+        setEditQuestionForm({
+          ...editQuestionForm,
+          answers: updated,
+        });
+      }}
+    />
+  </label>
+))}
+
+<label>
+  Правильный ответ
+
+  <input
+    value={editQuestionForm.correctAnswer}
+    onChange={(event) =>
+      setEditQuestionForm({
+        ...editQuestionForm,
+        correctAnswer: event.target.value,
+      })
+    }
+  />
+</label>
 
             <button className="button primary full" type="submit">
               Сохранить изменения
