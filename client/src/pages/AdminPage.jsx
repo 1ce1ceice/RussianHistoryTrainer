@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'https://russianhistorytrainer.onrender.com/api';
 
 export default function AdminPage() {
   const { user, token } = useAuth();

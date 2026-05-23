@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:5001/api';
+const API_URL = 'https://russianhistorytrainer.onrender.com/api';
 
 export const saveResult = async (token, resultData) => {
   const response = await fetch(`${API_URL}/results`, {

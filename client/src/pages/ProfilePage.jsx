@@ -11,7 +11,7 @@ export default function ProfilePage() {
         return;
       }
 
-      const response = await fetch('http://localhost:5001/api/results/stats', {
+      const response = await fetch('https://russianhistorytrainer.onrender.com/api/results/stats', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
