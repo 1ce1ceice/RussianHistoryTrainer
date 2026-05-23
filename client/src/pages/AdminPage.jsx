@@ -186,6 +186,31 @@ export default function AdminPage() {
     setMessage(data.message || 'Ошибка удаления темы');
   };
 
+  const deleteQuestion = async (questionId) => {
+    const isConfirmed = window.confirm('Удалить этот вопрос?');
+
+    if (!isConfirmed) {
+      return;
+    }
+
+    const response = await fetch(`${API_URL}/admin/questions/${questionId}`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setQuestions((prevQuestions) => prevQuestions.filter((question) => question.id !== questionId));
+      setMessage(data.message || 'Вопрос удален');
+      return;
+    }
+
+    setMessage(data.message || 'Ошибка удаления вопроса');
+  };
+
   return (
     <section className="admin-page">
       <p className="eyebrow">Администрирование</p>
@@ -343,6 +368,7 @@ export default function AdminPage() {
                   <th>ID</th>
                   <th>Вопрос</th>
                   <th>Тема</th>
+                  <th>Действия</th>
                 </tr>
               </thead>
               <tbody>
@@ -351,6 +377,15 @@ export default function AdminPage() {
                     <td>{question.id}</td>
                     <td>{question.text}</td>
                     <td>{question.topic}</td>
+                    <td>
+                      <button
+                        className="button secondary"
+                        type="button"
+                        onClick={() => deleteQuestion(question.id)}
+                      >
+                        Удалить
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
