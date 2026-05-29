@@ -6,6 +6,33 @@ const register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Заполните все поля' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ message: 'Введите корректный email' });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: 'Пароль должен содержать минимум 6 символов',
+      });
+    }
+
+    const existingUser = await pool.query(
+      'SELECT id FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({
+        message: 'Пользователь с таким email уже существует',
+      });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
@@ -44,7 +71,7 @@ const login = async (req, res) => {
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
-      process.env.JWT_SECRET || 'secret',
+      process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
 
