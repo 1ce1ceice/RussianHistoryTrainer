@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { saveResult } from '../api/resultApi.js';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const API_URL = 'https://russianhistorytrainer.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function QuizPage() {
   const { topicId } = useParams();

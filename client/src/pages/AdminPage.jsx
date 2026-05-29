@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 
-const API_URL = 'https://russianhistorytrainer.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export default function AdminPage() {
   const { user, token } = useAuth();

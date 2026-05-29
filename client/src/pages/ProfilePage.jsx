@@ -11,11 +11,14 @@ export default function ProfilePage() {
         return;
       }
 
-      const response = await fetch('https://russianhistorytrainer.onrender.com/api/results/stats', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+  `${API_URL}/results/stats`,
+  {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
 
       const data = await response.json();
       setStats(data);

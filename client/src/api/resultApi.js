@@ -1,4 +1,4 @@
-const API_URL = 'https://russianhistorytrainer.onrender.com/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const saveResult = async (token, resultData) => {
   const response = await fetch(`${API_URL}/results`, {
