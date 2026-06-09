@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext.jsx';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 export default function ProfilePage() {
   const { user, token, logout } = useAuth();
   const [stats, setStats] = useState(null);
@@ -11,14 +13,11 @@ export default function ProfilePage() {
         return;
       }
 
-      const response = await fetch(
-  `${API_URL}/results/stats`,
-  {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }
-);
+      const response = await fetch(`${API_URL}/results/stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       const data = await response.json();
       setStats(data);
